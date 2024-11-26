@@ -18,11 +18,12 @@ class UserController extends Controller {
             'location'        => 'string|required',
         ] );
 
-        if ( $request->hasFile( 'profile_picture' ) ) {
-            $path                  = $request->file( 'profile_picture' )
-                                             ->store( 'profile_pictures' );
-            $user->profile_picture = $path;
-        }
+        //if the front would send a file for the pic
+//        if ( $request->hasFile( 'profile_picture' ) ) {
+//            $path                  = $request->file( 'profile_picture' )
+//                                             ->store( 'profile_pictures' );
+//            $user->profile_picture = $path;
+//        }
 
         $user->update( $request->only( [
             'first_name',

@@ -21,6 +21,8 @@ return new class extends Migration
             $table->string('location')->nullable();
             $table->string('password');
             $table->string('locale')->default('en');
+            //creating roles (for later)
+            //$table->enum('rote',['user','admin'])->default('user');
             $table->rememberToken();
             $table->timestamps();
         });

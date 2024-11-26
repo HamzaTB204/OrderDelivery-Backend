@@ -13,8 +13,7 @@ class StoreController extends Controller
      */
     public function index()
     {
-        $stores = Store::all();
-        return response()->json($stores);
+
     }
 
     /**
@@ -30,8 +29,7 @@ class StoreController extends Controller
      */
     public function show(string $id)
     {
-        $store = Store::with('products')->findOrFail($id);
-        return response()->json($store);
+
     }
 
     /**
