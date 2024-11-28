@@ -14,23 +14,22 @@ class UserController extends Controller {
         $request->validate( [
             'first_name'      => 'string|required',
             'last_name'       => 'string|required',
-            'profile_picture' => 'string|nullable',
+            'profile_picture' => 'file|nullable',
             'location'        => 'string|required',
         ] );
 
-        //if the front would send a file for the pic
-//        if ( $request->hasFile( 'profile_picture' ) ) {
-//            $path                  = $request->file( 'profile_picture' )
-//                                             ->store( 'profile_pictures' );
-//            $user->profile_picture = $path;
-//        }
+
+        if ( $request->hasFile( 'profile_picture' ) ) {
+            $path                  = $request->file( 'profile_picture' )
+                                             ->store( 'profile_pictures' );
+            $user->profile_picture = $path;
+        }
 
         $user->update( $request->only( [
             'first_name',
             'last_name',
             'location',
         ] ) );
-
         return response()->json( $user );
     }
 
@@ -41,6 +40,10 @@ class UserController extends Controller {
             App::setLocale( $locale );
 
             $request->user()->locale=$locale;
+            $user=$request->user();
+            $user->update( $request->only([
+                'locale',
+            ]));
 
             return response()->json( [
                 'message' => 'Locale changed successfully',
