@@ -9,7 +9,7 @@ class Store extends Model {
 
     use HasFactory;
 
-    protected $fillable = [];
+    protected $fillable = ['name'];
 
     public function products() {
         return $this->hasMany( Product::class );
