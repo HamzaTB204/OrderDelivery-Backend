@@ -18,7 +18,8 @@ class Product extends Model
         'ar_description',
         'price',
         'quantity',
-        'store_id'
+        'store_id',
+        'orders_count'
     ];
     public function store():BelongsTo
     {
@@ -32,7 +33,7 @@ class Product extends Model
     }
     public function images():HasMany
     {
-        return $this->hasMany(Product::class);
+        return $this->hasMany(Image::class);
     }
     public function carts():BelongsToMany
     {

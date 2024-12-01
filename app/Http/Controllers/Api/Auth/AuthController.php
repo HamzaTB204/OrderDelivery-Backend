@@ -23,6 +23,7 @@ class AuthController extends Controller
             'password' => bcrypt($request->password),
         ]);
 
+
         return response()->json(['user' => $user], 201);
     }
 
@@ -40,6 +41,25 @@ class AuthController extends Controller
         }
         $this->create_favorite_cart($user);
         return response()->json(['token' => $user->createToken('api-token')->plainTextToken]);
+
+        $token = $user->createToken('api-token')->plainTextToken;
+
+        $userData = [
+            'id' => $user->id,
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'phone' => $user->phone,
+            'profile_picture' => $user->profile_picture ? url("storage/{$user->profile_picture}") : null,
+            'location' => $user->location,
+            'locale' => $user->locale,
+
+        ];
+
+
+        return response()->json([
+            'token' => $token,
+            'user' => $userData,
+        ], 200);
     }
 
     public function logout(Request $request)

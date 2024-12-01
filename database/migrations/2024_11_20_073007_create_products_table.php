@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('ar_description');
             $table->decimal('price',10,2);
             $table->integer('quantity');
+            $table->integer('orders_count')->default(0);
             $table->foreignIdFor(Store::class)->constrained()->cascadeOnDelete();
 
             $table->timestamps();

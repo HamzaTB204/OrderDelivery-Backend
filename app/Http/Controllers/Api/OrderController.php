@@ -118,7 +118,6 @@ class OrderController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    
     public function update(Request $request, string $id)
     {
         $user = auth()->user();
@@ -154,25 +153,26 @@ class OrderController extends Controller
     public function destroy(string $id)
     {
         $order = Order::findOrFail($id);
-        $orderProducts = OrderProduct::where('order_id',$order->id)->get();
+        $orderProducts = OrderProduct::where('order_id', $order->id)->get();
+
         try {
             foreach ($orderProducts as $orderProduct) {
-               
                 $product = Product::findOrFail($orderProduct->product_id);
                 $product->updateQuantity($orderProduct->quantity, 0);
+                $product->decrement('orders_count', 1);
+
                 $orderProduct->delete();
             }
+
             $deleted = $order->delete();
             if ($deleted) {
-                return response()->json(['message' => ' Deleted Done '], 200);
+                return response()->json(['message' => 'Deleted successfully'], 200);
             } else {
-                return response()->json(['message' => 'Not Deleted'], 500);
+                return response()->json(['message' => 'Order deletion failed'], 500);
             }
         } catch (\Exception $e) {
-            return response()->json(['message' => ' Something Wrong happenend ' . $e->getMessage()], 500);
+            return response()->json(['message' => 'Something went wrong: ' . $e->getMessage()], 500);
         }
     }
-    public function cancel_order(){
-        
-    }
+
 }

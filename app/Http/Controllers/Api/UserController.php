@@ -3,10 +3,31 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 
 class UserController extends Controller {
+
+
+
+    public function index(){
+        $users=User::all();
+        $users = $users->map(function ($user) {
+            return [
+                'id' => $user->id,
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'phone' => $user->phone,
+                'profile_picture' => $user->profile_picture ? url("storage/{$user->profile_picture}") : null,
+                'location' => $user->location,
+                'locale' => $user->locale,
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+            ];
+        });
+        return response()->json($users);
+    }
 
     public function updateProfile( Request $request ) {
         $user = $request->user();
@@ -14,7 +35,7 @@ class UserController extends Controller {
         $request->validate( [
             'first_name'      => 'string|required',
             'last_name'       => 'string|required',
-            'profile_picture' => 'file|nullable',
+            'profile_picture' => 'image|mimes:jpeg,png,jpg|max:2048|nullable',
             'location'        => 'string|required',
         ] );
 
@@ -30,7 +51,18 @@ class UserController extends Controller {
             'last_name',
             'location',
         ] ) );
-        return response()->json( $user );
+        $userData = [
+            'id' => $user->id,
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'phone' => $user->phone,
+            'profile_picture' => $user->profile_picture ? url("storage/{$user->profile_picture}") : null,
+            'location' => $user->location,
+            'locale' => $user->locale,
+            'created_at' => $user->created_at,
+            'updated_at' => $user->updated_at,
+        ];
+        return response()->json( $userData );
     }
 
 
