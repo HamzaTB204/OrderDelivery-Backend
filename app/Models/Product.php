@@ -18,7 +18,8 @@ class Product extends Model
         'ar_description',
         'price',
         'quantity',
-        'store_id'
+        'store_id',
+        'orders_count'
     ];
     public function store():BelongsTo
     {
@@ -32,7 +33,7 @@ class Product extends Model
     }
     public function images():HasMany
     {
-        return $this->hasMany(Product::class);
+        return $this->hasMany(Image::class);
     }
     public function carts():BelongsToMany
     {
@@ -45,6 +46,25 @@ class Product extends Model
         return $this->belongsToMany(Favorite::class, 'favorite_products')
                     ->withTimestamps();
     }
-
+    public function Quantity($quantity)
+    {
+        if ($this->quantity >= $quantity) {
+            $this->quantity -= $quantity;
+            $this->save();
+            return true;
+        }
+        return false;
+    }
+    public function updateQuantity($quantity,$new_quantity)
+    {
+        $this->quantity+=$quantity;
+        if ($this->quantity- $new_quantity >= 0) {
+            // $quantity -= $new_quantity;
+            $this->quantity -= $new_quantity;
+            $this->save();
+            return true;
+        }
+        return false;
+    }
 
 }
