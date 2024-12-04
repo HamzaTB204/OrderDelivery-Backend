@@ -14,5 +14,10 @@ class Store extends Model {
     public function products() {
         return $this->hasMany( Product::class );
     }
+    public function scopeSearch($query, $search)
+    {
+        $search = "%$search%";
+        return $query->where('name', 'like', $search);
+    }
 
 }

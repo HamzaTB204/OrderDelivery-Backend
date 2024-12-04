@@ -15,6 +15,7 @@ class ProductController extends Controller
     {
         try {
             $storeId = $request->query('store_id');
+            $search = $request->query('search');
             $page = $request->query('page', 1);
             $perPage = 10;
 
@@ -22,6 +23,10 @@ class ProductController extends Controller
 
             if ($storeId) {
                 $productsQuery->where('store_id', $storeId);
+            }
+
+            if ($search) {
+                $productsQuery->search($search);
             }
 
             $products = $productsQuery->with('store', 'images')->paginate($perPage, ['*'], 'page', $page);

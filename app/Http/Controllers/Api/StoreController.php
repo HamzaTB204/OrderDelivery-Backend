@@ -16,13 +16,18 @@ class StoreController extends Controller
     {
 
         $page = $request->input('page', 1);
-
         $perPage = 10;
+        $search = $request->input('search');
 
-        $stores = Store::withCount('products')
-                       ->skip(($page - 1) * $perPage)
-                       ->take($perPage)
-                       ->get();
+        $storesQuery = Store::withCount('products');
+
+        if ($search) {
+            $storesQuery->search($search);
+        }
+
+        $stores = $storesQuery->skip(($page - 1) * $perPage)
+                              ->take($perPage)
+                              ->get();
 
         $stores->transform(function ($store) {
             $store->logo = $store->logo ? url("storage/{$store->logo}") : null;
@@ -31,13 +36,13 @@ class StoreController extends Controller
             return $store;
         });
 
-        $totalStores = Store::count();
+        $totalStores = $search ?$storesQuery->count():Store::count();
 
         return response()->json([
             'current_page' => $page,
             'total_pages' => ceil($totalStores / $perPage),
             'stores' => $stores,
-        ]);
+        ], 200);
     }
 
     /**

@@ -66,4 +66,13 @@ class Product extends Model
         return false;
     }
 
+    public function scopeSearch($query, $search)
+    {
+        $search = "%$search%";
+        return $query->where('en_name', 'like', $search)
+                     ->orWhere('ar_name', 'like', $search)
+                     ->orWhere('en_description', 'like', $search)
+                     ->orWhere('ar_description', 'like', $search);
+    }
+
 }
