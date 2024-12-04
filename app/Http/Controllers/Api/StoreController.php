@@ -76,10 +76,10 @@ class StoreController extends Controller
 
         $store->logo = $store->logo ? url("storage/{$store->logo}") : null;
 
-        $page = $request->query('page', 1); 
+        $page = $request->query('page', 1);
         $perPage = 10;
 
-        $products = $store->products()
+        $products = $store->products()->with('images')
                           ->paginate($perPage, ['*'], 'page', $page);
 
         return response()->json([

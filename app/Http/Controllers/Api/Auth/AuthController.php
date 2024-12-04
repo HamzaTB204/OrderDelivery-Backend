@@ -20,6 +20,8 @@ class AuthController extends Controller
             'phone' => $request->phone,
             'password' => bcrypt($request->password),
         ]);
+        $user->cart()->create();
+        $user->favorite()->create();
 
 
         return response()->json(['user' => $user], 201);

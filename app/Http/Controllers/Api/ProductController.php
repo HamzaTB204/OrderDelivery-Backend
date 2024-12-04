@@ -24,27 +24,25 @@ class ProductController extends Controller
                 $productsQuery->where('store_id', $storeId);
             }
 
-            $products = $productsQuery->with('store')->paginate($perPage, ['*'], 'page', $page);
+            $products = $productsQuery->with('store', 'images')->paginate($perPage, ['*'], 'page', $page);
 
             if ($products->isEmpty()) {
                 return response()->json(['message' => 'No products found'], 404);
             }
 
             $products->getCollection()->transform(function ($product) use ($storeId) {
-                $product->images = $product->images->map(function ($image) {
-                    return url("storage/{$image->path}");
-                });
                 if (!$storeId) {
                     $product->store_name = $product->store->name ?? null;
                     $product->store_id = $product->store->id ?? null;
                 }
+
                 unset($product->store);
                 return $product;
             });
 
             return response()->json([
                 'message' => 'Products retrieved successfully.',
-                'products' => $products
+                'products' => $products,
             ], 200);
 
         } catch (\Exception $e) {
@@ -89,10 +87,6 @@ class ProductController extends Controller
             if (!$product) {
                 return response()->json(['message' => 'Product not found'], 404);
             }
-
-            $product->images = $product->images->map(function ($image) {
-                return url("storage/{$image->path}");
-            });
 
             $product->store_name = $product->store->name ?? null;
             $product->store_id = $product->store->id ?? null;
@@ -157,6 +151,68 @@ class ProductController extends Controller
             }
         } catch (\Exception $e) {
             return response()->json(['message' => ' Something Wrong happened ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function getMostOrderedProducts()
+    {
+        try {
+            $products = Product::with(['store', 'images'])
+                               ->orderBy('orders_count', 'desc')
+                               ->take(10)
+                               ->get();
+
+            if ($products->isEmpty()) {
+                return response()->json(['message' => 'No products found'], 404);
+            }
+
+            $products->transform(function ($product) {
+                $product->images = $product->images->map(function ($image) {
+                    return url("storage/{$image->path}");
+                });
+                $product->store_name = $product->store->name ?? null;
+                $product->store_id = $product->store->id ?? null;
+                unset($product->store);
+                return $product;
+            });
+
+            return response()->json([
+                'message' => 'Most ordered products retrieved successfully.',
+                'products' => $products,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Something went wrong: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function getLatestProducts()
+    {
+        try {
+            $products = Product::with(['store', 'images'])
+                               ->orderBy('created_at', 'desc')
+                               ->take(10)
+                               ->get();
+
+            if ($products->isEmpty()) {
+                return response()->json(['message' => 'No products found'], 404);
+            }
+
+            $products->transform(function ($product) {
+                $product->images = $product->images->map(function ($image) {
+                    return url("storage/{$image->path}");
+                });
+                $product->store_name = $product->store->name ?? null;
+                $product->store_id = $product->store->id ?? null;
+                unset($product->store);
+                return $product;
+            });
+
+            return response()->json([
+                'message' => 'Latest products retrieved successfully.',
+                'products' => $products,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Something went wrong: ' . $e->getMessage()], 500);
         }
     }
 

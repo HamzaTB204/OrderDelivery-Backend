@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\CartController;
+use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\ImageController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\StoreController;
@@ -29,6 +31,9 @@ Route::middleware(['auth:sanctum','user.locale'])->group(function () {
     Route::post('/profile', [UserController::class, 'updateProfile']);
     Route::post('/language',[UserController::class,'changeLocale']);
     Route::apiResource('/order', OrderController::class);
+    Route::apiResource('/favorite', FavoriteController::class);
+    Route::apiResource('/cart', CartController::class);
+    Route::get('/add-to-order',[CartController::class,'add_cart_To_order']);
 });
 
 
@@ -36,7 +41,10 @@ Route::middleware(['auth:sanctum','user.locale'])->group(function () {
 //for admin(later):
 Route::apiResource('/stores',StoreController::class);
 Route::get('/users',[UserController::class,'index']);
+Route::get('products/latest', [ProductController::class, 'getLatestProducts']);
+Route::get('products/most-ordered', [ProductController::class, 'getMostOrderedProducts']);
 Route::apiResource('/products',ProductController::class);
+
 
 Route::prefix('products/{productId}/images')->group(function () {
     Route::post('/', [ImageController::class, 'store']);
@@ -46,6 +54,6 @@ Route::prefix('products/{productId}/images')->group(function () {
 
 
 });
-// Route::apiResource('/order', OrderController::class);
+
 
 

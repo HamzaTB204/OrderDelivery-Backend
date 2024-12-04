@@ -18,5 +18,11 @@ class Image extends Model
     {
         return $this->belongsTo(Product::class);
     }
+    protected $appends = ['url']; // Add 'url' to always include it in JSON
+
+    public function getUrlAttribute()
+    {
+        return url("storage/{$this->path}");
+    }
 
 }

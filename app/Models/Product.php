@@ -59,7 +59,6 @@ class Product extends Model
     {
         $this->quantity+=$quantity;
         if ($this->quantity- $new_quantity >= 0) {
-            // $quantity -= $new_quantity;
             $this->quantity -= $new_quantity;
             $this->save();
             return true;
