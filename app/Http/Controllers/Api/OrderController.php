@@ -139,7 +139,6 @@ class OrderController extends Controller
                 return response()->json(['success' => false, 'message' => 'There is not enough product'], 400);
             }
             $totalPrice = $product->price * $request->quantity;
-            $orderProduct = OrderProduct::where('order_id', $order->id)->where('product_id', $product->id)->firstOrFail();
             $orderProduct->update([
                 'quantity' => $request->quantity,
                 'price' => $totalPrice,

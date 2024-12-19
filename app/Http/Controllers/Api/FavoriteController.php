@@ -28,7 +28,7 @@ class FavoriteController extends Controller
             }
             $allproduct=[];
             foreach ($favoriteProduct as $product) {
-                $allproduct[]=Product::find($product->product_id);
+                $allproduct[]=Product::with('store', 'images')->find( $product->product_id );
             }
             return response()->json(['Favorite Product' => $allproduct]);
         } catch (\Exception $e) {

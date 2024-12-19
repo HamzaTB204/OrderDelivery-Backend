@@ -22,16 +22,23 @@ class CartController extends Controller
             return response()->json(['success' => false, 'message' => 'User  not authenticated.'], 401);
         }
         try {
+           
             $cart = Cart::where('user_id', $user->id)->first();
             $cartProduct = CartProduct::where('cart_id', $cart->id)->get();
             if (!$cartProduct) {
                 return response()->json(['message' => 'You did not add any product to your cart'], 404);
             }
             $allProducts=[];
+            $totalPrice=0;
             foreach ($cartProduct as $product) {
-                $allProducts[]=Cart::find($product->product_id);
+                $totalPrice+=$product->price;
+                $product = Product::with('store', 'images')->find( $product->id );
+                $allProducts[]= $product;
             }
-            return response()->json(['Cart Product' => $allProducts]);
+            return response()->json([
+                'Cart Product' => $allProducts ,
+                'Total Price'=> $totalPrice,
+            ]);
         } catch (\Exception $e) {
             return response()->json(['message' => ' Something Wrong happened ' . $e->getMessage()], 500);
         }
@@ -79,25 +86,56 @@ class CartController extends Controller
      */
     public function show(string $id)
     {
-        $user = auth()->user();
-        if (!$user) {
-            return response()->json(['success' => false, 'message' => 'User  not authenticated.'], 401);
-        }
-        try {
-            return response()->json(['product'=> Product::find($id)]);
+        // $user = auth()->user();
+        // if (!$user) {
+        //     return response()->json(['success' => false, 'message' => 'User  not authenticated.'], 401);
+        // }
+        // try {
+        //     $product = Product::with('store', 'images')->find( $id );
+        //     $cart = Cart::where('user_id', $user->id)->first();
+        //     $cartProduct = CartProduct::where('cart_id', $cart->id)->where('product_id',$id)->first();
+        //     return response()->json([
+        //         'product'=> $product,
+        //         'price'=>$cartProduct->price,
+        //         'Quantity'=>$cartProduct->quantity,
+        //     ], );
 
-        }catch (\Exception $e) {
+        // }catch (\Exception $e) {
 
-            return response()->json(['success' => false, 'message' => ''. $e->getMessage()], 500);
-        }
+        //     return response()->json(['success' => false, 'message' => ''. $e->getMessage()], 500);
+        // }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Cart $cart)
+    public function update(Request $request, String $id)
     {
-        //
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User  not authenticated.'], 401);
+        }
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|integer|min:1',
+        ]);
+        $product = Product::find( $request->product_id);
+        try {
+            $cart = Cart::where('user_id', $user->id)->first();
+            $cartProductExists = CartProduct::where('cart_id', $cart->id)->where('product_id', $request->product_id)->first();
+            $isUpdated = $product->updateQuantity($cartProductExists->quantity , $request->quantity );
+            if (!$isUpdated) {
+                return response()->json(['success' => false, 'message' => 'There is not enough product'], 400);
+            }
+            $totalPrice = $product->price * $request->quantity;
+            $cartProductExists->update([
+                'quantity' => $request->quantity,
+                'price' => $totalPrice,
+            ]);
+            return response()->json(['success' => true, 'message' => 'quantity updated successfully.'], 200);
+        }catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => ''. $e->getMessage()], 500);
+        }
     }
 
     /**

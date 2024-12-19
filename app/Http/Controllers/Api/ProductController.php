@@ -88,7 +88,7 @@ class ProductController extends Controller
     {
         try {
             $product = Product::with('store', 'images')->find($id);
-
+            
             if (!$product) {
                 return response()->json(['message' => 'Product not found'], 404);
             }
