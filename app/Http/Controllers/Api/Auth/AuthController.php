@@ -50,12 +50,12 @@ class AuthController extends Controller
             'profile_picture' => $user->profile_picture ? url("storage/{$user->profile_picture}") : null,
             'location' => $user->location,
             'locale' => $user->locale,
+            'token'=>$token
 
         ];
 
 
         return response()->json([
-            'token' => $token,
             'user' => $userData,
         ], 200);
     }
