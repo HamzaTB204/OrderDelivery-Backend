@@ -190,15 +190,15 @@ class CartController extends Controller
             return response()->json(['success'=> false, 'message'=> 'there is no product in your cart']);
         }
         try {
+            $order = Order::create([
+                'user_id' => $user->id,
+                'status' => 'pending',
+            ]);
             foreach ($cartProduct as $product){
                 $product2 = Product::find($product->product_id);
                 $isUpdated = $product2->Quantity($product->quantity);
                 $product2->increment('orders_count', 1);
                 if ($isUpdated){
-                    $order = Order::create([
-                        'user_id' => $user->id,
-                        'status' => 'pending',
-                    ]);
                     OrderProduct::create([
                         'order_id' => $order->id,
                         'product_id' => $product->product_id,

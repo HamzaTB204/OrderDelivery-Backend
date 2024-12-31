@@ -34,6 +34,7 @@ Route::middleware(['auth:sanctum','user.locale'])->group(function () {
     Route::apiResource('/favorite', FavoriteController::class);
     Route::apiResource('/cart', CartController::class);
     Route::get('/add-to-order',[CartController::class,'add_cart_To_order']);
+    Route::get('/cancel-order/{orderId}', [OrderController::class,'cancelOrder']);
 });
 
 

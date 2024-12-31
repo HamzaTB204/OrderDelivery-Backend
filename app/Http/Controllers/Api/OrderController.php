@@ -175,5 +175,26 @@ class OrderController extends Controller
             return response()->json(['message' => 'Something went wrong: ' . $e->getMessage()], 500);
         }
     }
+    public function cancelOrder(string $orderId ){
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User  not authenticated.'], 401);
+        }
+        try {
+        $order = Order::where('id', $orderId)->where('user_id', $user->id)->first();
+        $order->updateStatus('canceled');
+        $orderProducts = OrderProduct::where('order_id', $order->id)->get();
+        foreach ($orderProducts as $orderProduct) {
+            $product = Product::findOrFail($orderProduct->product_id);
+            $product->updateQuantity($orderProduct->quantity,0);
+            $product->decrement('orders_count', 1);
+        }
+        return response()->json([
+            'message' => 'Order canceled successfully',
+        ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Something went wrong: ' . $e->getMessage()], 500);
+        }
+    }
 
 }
