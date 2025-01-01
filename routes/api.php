@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('/changeRole/{id}', [UserController::class, 'changeRole']);
+
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -60,12 +60,15 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::post('/order', [OrderController::class, 'store']);
     Route::put('/order/{id}', [OrderController::class, 'update']);
     Route::get('/cancel-order/{id}', [OrderController::class,'cancelOrder']);
+    //for admin and driver: role checking in the method:
+    Route::post('/order/{id}/status', [OrderController::class, 'changeOrderStatus']);
 
 
     //routes for the admin:
     Route::middleware(['role:admin'])->group(function(){
         //user:
         Route::get('/users',[UserController::class,'index']);
+        Route::post('/changeRole/{id}', [UserController::class, 'changeRole']);
         //store:
         Route::post('/stores', [StoreController::class, 'store']);
         Route::put('/stores/{store}', [StoreController::class, 'update']);
@@ -85,15 +88,9 @@ Route::middleware(['auth:sanctum'])->group(function(){
         Route::delete('/order/{id}', [OrderController::class, 'destroy']);
 
 
-
-
-
     });
 
-    //routes for the driver:
-    Route::middleware(['role:driver'])->group(function(){
 
-    });
 
 
 
