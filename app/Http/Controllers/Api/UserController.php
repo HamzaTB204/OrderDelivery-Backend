@@ -9,7 +9,29 @@ use Illuminate\Support\Facades\App;
 
 class UserController extends Controller {
 
+    public function changeRole(Request $request, $id)
+    {
+        // Validate the incoming request
+        $request->validate([
+            'role' => 'required|in:user,admin,driver',
+        ]);
 
+        // Find the user by ID
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        // Update the role
+        $user->role = $request->role;
+        $user->save();
+
+        return response()->json([
+            'message' => 'User role updated successfully',
+            'user' => $user,
+        ]);
+    }
 
     public function index(){
         $users=User::all();
@@ -59,6 +81,7 @@ class UserController extends Controller {
             'profile_picture' => $user->profile_picture ? url("storage/{$user->profile_picture}") : null,
             'location' => $user->location,
             'locale' => $user->locale,
+            'role'=>$user->role,
             'created_at' => $user->created_at,
             'updated_at' => $user->updated_at,
         ];

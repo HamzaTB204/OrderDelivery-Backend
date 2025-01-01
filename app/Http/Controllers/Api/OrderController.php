@@ -22,18 +22,38 @@ class OrderController extends Controller
         if (!$user) {
             return response()->json(['success' => false, 'message' => 'User  not authenticated.'], 401);
         }
-        try {
+
+        if ($user->role === 'admin') {
+            $orders = Order::all();
+        }
+        else {
             $orders = Order::where('user_id', $user->id)->get();
+        }
+        try {
 
             if ($orders->isEmpty()) {
                 return response()->json(['message' => 'No orders found.'], 404);
             }
-
-            $ordersWithProducts = $orders->map(function ($order) {
-                $order->products = OrderProduct::where('order_id', $order->id)->get();
-                return $order;
-            });
-
+            $allOrders=[];
+            foreach($orders as $order){
+                if ($order->status !== 'canceled'){
+                    $orderProduct = OrderProduct::where('order_id', $order->id)->first();
+                    $productDetails = Product::with('store', 'images')->find($orderProduct->product_id);
+                    $store = $productDetails->store;
+                    if ($store) {
+                        $store->logo = $store->logo ? url("storage/{$store->logo}") : null;
+                        if (!isset($stores[$store->id])) {
+                            $stores[$store->id] = $store;
+                        }
+                    }
+                    $allOrders[] = [
+                        'order status' =>$order->status,
+                        'order details' => $orderProduct,
+                        'product details' => $productDetails
+                    ];
+                }
+            }
+            return $allOrders;
             return response()->json(['data' => $ordersWithProducts ], 200);
 
         } catch (\Exception $e) {
@@ -102,13 +122,28 @@ class OrderController extends Controller
             return response()->json(['success' => false, 'message' => 'User  not authenticated.'], 401);
         }
         try {
-            $orders = Order::where('user_id', $user->id)->where('id', $id)->get();
-
-            if ($orders->isEmpty()) {
-                return response()->json(['message' => 'No orders found.'], 404);
+            $order = Order::where('user_id', $user->id)->where('id', $id)->first();
+            if (!$order) {
+                return response()->json([ 'message' => 'Order not found.'], 404);
             }
-            $orderDetails=OrderProduct::where('order_id',$id)->get();
-            return response()->json(['data'=> $orders , 'more details' => $orderDetails ], 200);
+            if ($order->status === 'canceled'){
+                return response()->json([ 'message' => 'the order canceled'], 404);
+            }
+            $orderDetails=OrderProduct::where('order_id',$id)->first();
+            $productDetails = Product::with('store', 'images')->find($orderDetails->product_id);
+            $store = $productDetails->store;
+            if ($store) {
+                $store->logo = $store->logo ? url("storage/{$store->logo}") : null;
+                if (!isset($stores[$store->id])) {
+                    $stores[$store->id] = $store;
+                }
+            }
+            $allOrders[] = [
+                'order status' =>$order->status,
+                'order details' => $orderDetails,
+                'product details' => $productDetails
+            ];
+            return response()->json([ 'order details' => $allOrders ], 200);
         } catch (\Exception $e) {
             return response()->json(['message' => ' Something Wrong happenend ' . $e->getMessage()], 500);
         }
@@ -139,7 +174,6 @@ class OrderController extends Controller
                 return response()->json(['success' => false, 'message' => 'There is not enough product'], 400);
             }
             $totalPrice = $product->price * $request->quantity;
-            $orderProduct = OrderProduct::where('order_id', $order->id)->where('product_id', $product->id)->firstOrFail();
             $orderProduct->update([
                 'quantity' => $request->quantity,
                 'price' => $totalPrice,
@@ -172,6 +206,27 @@ class OrderController extends Controller
             } else {
                 return response()->json(['message' => 'Order deletion failed'], 500);
             }
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Something went wrong: ' . $e->getMessage()], 500);
+        }
+    }
+    public function cancelOrder(string $orderId ){
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User  not authenticated.'], 401);
+        }
+        try {
+            $order = Order::where('id', $orderId)->where('user_id', $user->id)->first();
+            $order->updateStatus('canceled');
+            $orderProducts = OrderProduct::where('order_id', $order->id)->get();
+            foreach ($orderProducts as $orderProduct) {
+                $product = Product::findOrFail($orderProduct->product_id);
+                $product->updateQuantity($orderProduct->quantity,0);
+                $product->decrement('orders_count', 1);
+            }
+            return response()->json([
+                'message' => 'Order canceled successfully',
+            ]);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Something went wrong: ' . $e->getMessage()], 500);
         }

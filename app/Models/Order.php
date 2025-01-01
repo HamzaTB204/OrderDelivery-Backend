@@ -22,5 +22,14 @@ class Order extends Model
                     ->withPivot('quantity', 'price')
                     ->withTimestamps();
     }
+    public function updateStatus($newStatus)
+    {
+        if (in_array($newStatus, self::$status)) {
+            $this->status = $newStatus;
+            $this->save();
+            return true;
+        }
+        return false;
+    }
 
 }

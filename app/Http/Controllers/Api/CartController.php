@@ -104,24 +104,7 @@ class CartController extends Controller
      */
     public function show(string $id)
     {
-        // $user = auth()->user();
-        // if (!$user) {
-        //     return response()->json(['success' => false, 'message' => 'User  not authenticated.'], 401);
-        // }
-        // try {
-        //     $product = Product::with('store', 'images')->find( $id );
-        //     $cart = Cart::where('user_id', $user->id)->first();
-        //     $cartProduct = CartProduct::where('cart_id', $cart->id)->where('product_id',$id)->first();
-        //     return response()->json([
-        //         'product'=> $product,
-        //         'price'=>$cartProduct->price,
-        //         'Quantity'=>$cartProduct->quantity,
-        //     ], );
 
-        // }catch (\Exception $e) {
-
-        //     return response()->json(['success' => false, 'message' => ''. $e->getMessage()], 500);
-        // }
     }
 
     /**
@@ -190,15 +173,15 @@ class CartController extends Controller
             return response()->json(['success'=> false, 'message'=> 'there is no product in your cart']);
         }
         try {
+            $order = Order::create([
+                'user_id' => $user->id,
+                'status' => 'pending',
+            ]);
             foreach ($cartProduct as $product){
                 $product2 = Product::find($product->product_id);
                 $isUpdated = $product2->Quantity($product->quantity);
                 $product2->increment('orders_count', 1);
                 if ($isUpdated){
-                    $order = Order::create([
-                        'user_id' => $user->id,
-                        'status' => 'pending',
-                    ]);
                     OrderProduct::create([
                         'order_id' => $order->id,
                         'product_id' => $product->product_id,
