@@ -12,6 +12,19 @@ class StoreController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function storeCount(){
+        try{
+            $storeCount = Store::count();
+            return response()->json([
+                'message' => 'Store count retrieved successfully.',
+                'store_count'=>$storeCount
+            ]);
+        }catch(\Exception $e){
+            return response()->json([
+                'message'=>'Something went wrong: '.$e->getMessage()
+            ],500);
+        }
+    }
     public function index(Request $request)
     {
 

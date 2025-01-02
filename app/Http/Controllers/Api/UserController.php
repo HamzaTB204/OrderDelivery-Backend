@@ -9,6 +9,23 @@ use Illuminate\Support\Facades\App;
 
 class UserController extends Controller {
 
+    public function userCount()
+    {
+        try {
+            $userCount = User::where('role', 'user')->count();
+            $driverCount = User::where('role', 'driver')->count();
+
+            return response()->json([
+                'user_count' => $userCount,
+                'driver_count' => $driverCount,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Something went wrong: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function changeRole(Request $request, $id)
     {
 

@@ -11,6 +11,18 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function productCount()
+    {
+        try {
+            $count = Product::count();
+            return response()->json([
+                'message' => 'Product count retrieved successfully.',
+                'product_count' => $count,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Something went wrong: ' . $e->getMessage()], 500);
+        }
+    }
     public function index(Request $request)
     {
         try {
@@ -68,13 +80,14 @@ class ProductController extends Controller
                 'ar_description' => "required|max:255",
                 'quantity' => "required",
                 'price' => "required",
-                'store_id' => "required",
+                'store_id' => "required|exists:stores,id",
             ]);
 
-            Product::create($fields);
+            $product=Product::create($fields);
 
             return response()->json([
-                'message' =>  "Product Added Successfully"
+                'message' =>  "Product Added Successfully",
+                'product' => $product
             ]);
         }catch (\Exception $e) {
             return response()->json(['message' => ' Something Wrong happened ' . $e->getMessage()], 500);

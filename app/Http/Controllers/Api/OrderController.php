@@ -15,6 +15,19 @@ class OrderController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function totalProfit()
+    {
+        try {
+            $totalProfit = OrderProduct::sum('price');
+
+            return response()->json([
+                'message' => 'Total profit calculated successfully.',
+                'total_profit' => $totalProfit,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Something went wrong: ' . $e->getMessage()], 500);
+        }
+    }
     public function index()
     {
         $user = auth()->user();

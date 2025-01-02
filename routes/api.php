@@ -69,14 +69,17 @@ Route::middleware(['auth:sanctum'])->group(function(){
         //user:
         Route::get('/users',[UserController::class,'index']);
         Route::post('/changeRole/{id}', [UserController::class, 'changeRole']);
+        Route::get('user-count',[UserController::class,'userCount']);
         //store:
         Route::post('/stores', [StoreController::class, 'store']);
         Route::put('/stores/{store}', [StoreController::class, 'update']);
         Route::delete('/stores/{store}', [StoreController::class, 'destroy']);
+        Route::get('store-count',[StoreController::class,'storeCount']);
         //product:
         Route::post('/products', [ProductController::class, 'store']);
         Route::put('/products/{id}', [ProductController::class, 'update']);
         Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+        Route::get('/product-count',[ProductController::class,'productCount']);
         //images for products:
         Route::prefix('products/{productId}/images')->group(function () {
             Route::post('/', [ImageController::class, 'store']);
@@ -86,6 +89,7 @@ Route::middleware(['auth:sanctum'])->group(function(){
         });
         //order:
         Route::delete('/order/{id}', [OrderController::class, 'destroy']);
+        Route::get('total-profit',[OrderController::class,'totalProfit']);
 
 
     });
