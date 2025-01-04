@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Favorite;
 use App\Models\FavoriteProduct;
+use App\Models\Order;
+use App\Models\OrderProduct;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -123,6 +125,51 @@ class FavoriteController extends Controller
             }
         }catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => ''. $e->getMessage()], 500);
+        }
+    }
+
+    public function add_favorites_to_order()
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User not authenticated.'], 401);
+        }
+
+        try {
+            $favorite = Favorite::where('user_id', $user->id)->first();
+            if (!$favorite) {
+                return response()->json(['success' => false, 'message' => 'You have no favorites.'], 404);
+            }
+
+            $favoriteProducts = FavoriteProduct::where('favorite_id', $favorite->id)->get();
+            if ($favoriteProducts->isEmpty()) {
+                return response()->json(['success' => false, 'message' => 'Your favorite list is empty.'], 404);
+            }
+            $order = Order::create([
+                'user_id' => $user->id,
+                'status' => 'pending',
+            ]);
+
+            foreach ($favoriteProducts as $favoriteProduct) {
+                $product = Product::find($favoriteProduct->product_id);
+                if (!$product) {
+                    continue;
+                }
+                $isUpdated = $product->Quantity(1);
+                if ($isUpdated) {
+                    OrderProduct::create([
+                        'order_id' => $order->id,
+                        'product_id' => $product->id,
+                        'quantity' => 1,
+                        'price' => $product->price,
+                    ]);
+                    $product->increment('orders_count', 1);
+                    $favoriteProduct->delete();
+                }
+            }
+            return response()->json(['success' => true, 'message' => 'your favorites have been ordered and reset'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 }

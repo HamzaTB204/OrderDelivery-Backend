@@ -47,6 +47,7 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::post('/favorite', [FavoriteController::class, 'store']);
     Route::put('/favorite/{id}', [FavoriteController::class, 'update']);
     Route::delete('/favorite/{id}', [FavoriteController::class, 'destroy']);
+    Route::post('/favorite/order',[FavoriteController::class,'add_favorites_to_order']);
     //cart:
     Route::get('/cart', [CartController::class, 'index']);
     Route::get('/cart/{id}', [CartController::class, 'show']);
