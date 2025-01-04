@@ -8,6 +8,7 @@ use App\Models\FavoriteProduct;
 use App\Models\Order;
 use App\Models\OrderProduct;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class FavoriteController extends Controller
@@ -145,8 +146,10 @@ class FavoriteController extends Controller
             if ($favoriteProducts->isEmpty()) {
                 return response()->json(['success' => false, 'message' => 'Your favorite list is empty.'], 404);
             }
+            $driver = User::where('role', 'driver')->inRandomOrder()->first();
             $order = Order::create([
                 'user_id' => $user->id,
+                'driver_id'=>$driver?->id,
                 'status' => 'pending',
             ]);
 

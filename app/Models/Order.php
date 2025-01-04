@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Order extends Model
 {
     use HasFactory;
-    protected $fillable=['user_id','status'];
+    protected $fillable=['user_id','driver_id','status'];
 
     public static array $status = ['pending', 'delivering', 'delivered','canceled'];
 

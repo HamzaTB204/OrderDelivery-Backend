@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->unsignedBigInteger('driver_id')->nullable();
             $table->enum('status',Order::$status);
 
             $table->timestamps();

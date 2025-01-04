@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
+use App\Models\OrderProduct;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
@@ -26,6 +29,54 @@ class UserController extends Controller {
         }
     }
 
+    public function driverOrders()
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User not authenticated.'], 401);
+        }
+        if ($user->role !== 'driver') {
+            return response()->json(['success' => false, 'message' => 'Access denied, Drivers only.'], 403);
+        }
+
+        try {
+            $orders = Order::where('driver_id', $user->id)->get();
+            if ($orders->isEmpty()) {
+                return response()->json(['message' => 'No orders assigned to you.'], 404);
+            }
+
+            $allOrders = [];
+            foreach ($orders as $order) {
+                $productsDetails = [];
+                $orderProducts = OrderProduct::where('order_id', $order->id)->get();
+                foreach ($orderProducts as $orderProduct) {
+                    $productDetail = Product::with('store', 'images')->find($orderProduct->product_id);
+                    $store = $productDetail->store;
+
+                    if ($store) {
+                        $store->logo = $store->logo ? url("storage/{$store->logo}") : null;
+                    }
+
+                    $productsDetails[] = [
+                        'order details' => $orderProduct,
+                        'product details' => $productDetail,
+                    ];
+                }
+
+                $allOrders[] = [
+                    'order status' => $order->status,
+                    'driver_id' => $order->driver_id,
+                    'products' => $productsDetails,
+                ];
+            }
+
+            return response()->json($allOrders, 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Something wrong happened: ' . $e->getMessage()], 500);
+        }
+    }
     public function changeRole(Request $request, $id)
     {
 

@@ -63,6 +63,8 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::get('/cancel-order/{id}', [OrderController::class,'cancelOrder']);
     //for admin and driver: role checking in the method:
     Route::post('/order/{id}/status', [OrderController::class, 'changeOrderStatus']);
+    //for the driver only: role checking in the method:
+    Route::get('driver-orders',[UserController::class,'driverOrders']);
 
 
     //routes for the admin:

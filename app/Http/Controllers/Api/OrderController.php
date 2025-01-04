@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\OrderProduct;
@@ -69,7 +70,8 @@ class OrderController extends Controller
 
                 $allOrders[] = [
                     'order status' =>$order->status,
-                    'order details' => $productsDetails,
+                    'driver_id'=>$order->driver_id,
+                    'products' => $productsDetails,
                 ];
 
             }
@@ -102,8 +104,11 @@ class OrderController extends Controller
             $isUpdated = $product->Quantity($request->quantity);
             if ($isUpdated) {
                 try {
+                    $driver = User::where('role', 'driver')->inRandomOrder()->first();
+
                     $order = Order::create([
                         'user_id' => $user->id,
+                        'driver_id' => $driver?->id,
                         'status' => 'pending',
                     ]);
 
@@ -164,11 +169,12 @@ class OrderController extends Controller
             }
             $allOrders[] = [
                 'order status' => $order->status,
+                'driver_id'=>$order->driver_id,
                 'products' => $productsDetails
             ];
             return response()->json([ 'order details' => $allOrders ], 200);
         } catch (\Exception $e) {
-            return response()->json(['message' => ' Something Wrong happenend ' . $e->getMessage()], 500);
+            return response()->json(['message' => ' Something Wrong happened ' . $e->getMessage()], 500);
         }
 
     }

@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderProduct;
 use App\Models\Product;
 use App\Models\Store;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
@@ -172,9 +173,11 @@ class CartController extends Controller
         if ($cartProduct->isEmpty()){
             return response()->json(['success'=> false, 'message'=> 'there is no product in your cart']);
         }
+        $driver = User::where('role', 'driver')->inRandomOrder()->first();
         try {
             $order = Order::create([
                 'user_id' => $user->id,
+                'driver_id'=>$driver?->id,
                 'status' => 'pending',
             ]);
             foreach ($cartProduct as $product){
