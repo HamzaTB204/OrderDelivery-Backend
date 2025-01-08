@@ -26,6 +26,33 @@ class AdminUserSeeder extends Seeder
                 'password' => bcrypt('password'),
             ]
         );
+        User::updateOrCreate(
+            ['id' => 2],
+            [
+                'first_name' => 'John',
+                'last_name' => 'Doe',
+                'phone' => '1234567891',
+                'profile_picture' => null,
+                'location' => 'Damascus',
+                'locale' => 'en',
+                'role' => 'driver',
+                'password' => bcrypt('password'),
+            ]
+        );
+        User::updateOrCreate(
+            ['id' => 3],
+            [
+                'first_name' => 'Jane',
+                'last_name' => 'Doe',
+                'phone' => '1234567892',
+                'profile_picture' => null,
+                'location' => 'Damascus',
+                'locale' => 'en',
+                'role' => 'driver',
+                'password' => bcrypt('password'),
+            ]
+        );
+
     }
 
 }
