@@ -36,25 +36,32 @@ class OrderController extends Controller
             }
             $allOrders=[];
             foreach($orders as $order){
-                if ($order->status !== 'canceled'){
-                    $orderProduct = OrderProduct::where('order_id', $order->id)->first();
-                    $productDetails = Product::with('store', 'images')->find($orderProduct->product_id);
-                    $store = $productDetails->store; 
+                $productsDetails = [];
+                $orderProducts = OrderProduct::where('order_id', $order->id)->get();
+                foreach ($orderProducts as $orderProduct) {
+                    $productDetail = Product::with('store', 'images')->find($orderProduct->product_id);
+                    $store = $productDetail->store; 
+                    
                     if ($store) {
                         $store->logo = $store->logo ? url("storage/{$store->logo}") : null; 
                         if (!isset($stores[$store->id])) {
                             $stores[$store->id] = $store;
                         }
                     }
-                    $allOrders[] = [
-                        'order status' =>$order->status,
+                    $productsDetails[] = [
                         'order details' => $orderProduct,
-                        'product details' => $productDetails
-                    ];  
+                        'product details' => $productDetail
+                    ];
                 }
+                
+                $allOrders[] = [
+                    'order status' =>$order->status,
+                    'order details' => $productsDetails,
+                ];  
+                
             }
             return $allOrders;
-            return response()->json(['data' => $ordersWithProducts ], 200);
+            //return response()->json(['data' => $ordersWithProducts ], 200);
 
         } catch (\Exception $e) {
             return response()->json(['message' => ' Something Wrong happenend ' . $e->getMessage()], 500);
@@ -126,23 +133,27 @@ class OrderController extends Controller
             if (!$order) {
                 return response()->json([ 'message' => 'Order not found.'], 404);
             }
-            if ($order->status === 'canceled'){
-                return response()->json([ 'message' => 'the order canceled'], 404);
-            }
-            $orderDetails=OrderProduct::where('order_id',$id)->first();
-            $productDetails = Product::with('store', 'images')->find($orderDetails->product_id);
-                    $store = $productDetails->store; 
-                    if ($store) {
-                        $store->logo = $store->logo ? url("storage/{$store->logo}") : null; 
-                        if (!isset($stores[$store->id])) {
-                            $stores[$store->id] = $store;
-                        }
+            $allOrders = [];
+            $productsDetails = [];
+            $orderDetails = OrderProduct::where('order_id', $order->id)->get();
+            foreach ($orderDetails as $orderProduct) {
+                $productDetails = Product::with('store', 'images')->find($orderProduct->product_id);
+                $store = $productDetails->store; 
+                if ($store) {
+                    $store->logo = $store->logo ? url("storage/{$store->logo}") : null; 
+                    if (!isset($stores[$store->id])) {
+                        $stores[$store->id] = $store;
                     }
-                    $allOrders[] = [
-                        'order status' =>$order->status,
-                        'order details' => $orderDetails,
-                        'product details' => $productDetails
-                    ];  
+                }
+                $productsDetails[] = [
+                    'order details' => $orderProduct,
+                    'product details' => $productDetails
+                ];
+            }
+            $allOrders[] = [
+                'order status' => $order->status,
+                'products' => $productsDetails 
+            ];  
             return response()->json([ 'order details' => $allOrders ], 200);
         } catch (\Exception $e) {
             return response()->json(['message' => ' Something Wrong happenend ' . $e->getMessage()], 500);
