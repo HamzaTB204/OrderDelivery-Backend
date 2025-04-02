@@ -37,10 +37,10 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::get('/stores', [StoreController::class, 'index']);
     Route::get('/stores/{store}', [StoreController::class, 'show']);
     //product:
-    Route::get('/products', [ProductController::class, 'index']);
-    Route::get('/products/{product}', [ProductController::class, 'show']);
     Route::get('products/latest', [ProductController::class, 'getLatestProducts']);
     Route::get('products/most-ordered', [ProductController::class, 'getMostOrderedProducts']);
+    Route::get('/products', [ProductController::class, 'index']);
+    Route::get('/products/{product}', [ProductController::class, 'show']);
     //favorite:
     Route::get('/favorite', [FavoriteController::class, 'index']);
     Route::get('/favorite/{id}', [FavoriteController::class, 'show']);
